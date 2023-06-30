@@ -15,6 +15,11 @@ var SimpleSendGridAdapter = require("parse-server-sendgrid-adapter");
 var app = express();
 
 var api = new ParseServer({
+  cacheHeaders: {
+    "Cache-Control": "no-cache, no-store, must-revalidate",
+    Pragma: "no-cache",
+    Expires: "0",
+  },
   databaseURI: "mongodb://127.0.0.1:27017/test",
   cloud: __dirname + "/cloud/main.js",
   appId: "test",

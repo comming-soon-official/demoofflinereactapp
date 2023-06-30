@@ -1,59 +1,56 @@
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 
+import Parse from "./service/parseApi";
+import { useSelector } from "react-redux";
+import Todos from "./components/Todos";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import Login from "./Auth/Login";
+import Signup from "./Auth/Signup";
+const currentUser = Parse.User.current();
 const App = () => {
-  const [todo, setTodo] = useState("");
-  const [todoList, setTodoList] = useState([]);
-  // const [mixedTodo, setMixedTodo] = useState([]);
-  const [isOnline] = useState(navigator.onLine);
+  const todos = useSelector((state) => state.todos);
+  const isOnline = useSelector((state) => state.auth.isOnline);
+  //   useEffect(() => {
+  //     if (currentUser && isOnline) {
+  //       const servertodos = currentUser.get("todos");
+  //       localStorage.setItem("todos", JSON.stringify(servertodos));
+  //     }
+  //   }, []);
+  //   useEffect(() => {
+  //     const fetch = async () => {
+  //       const newUser = await Parse.User.current().fetch();
+  //       if (currentUser && isOnline) {
+  //         const servertodos = currentUser.get("todos");
+  //         const localvalue = JSON.parse(localStorage.getItem("todos"));
+  //         if (servertodos[servertodos.length - 1]?.date != undefined) {
+  //           if (
+  //             servertodos[servertodos.length - 1]?.date < new Date().getTime()
+  //           ) {
+  //             localStorage.setItem("todos", JSON.stringify(servertodos));
+  //           }
+  //         }
+  //         console.log(servertodos[servertodos.length - 1]?.date);
+  //       }
+  //     };
+  //     fetch();
+  //   }, []);
   useEffect(() => {
-    const fetch = async () => {
-      const localitems = localStorage.getItem("todos");
-      setTodoList(() => JSON.parse(localitems));
-      try {
-        const res = await axios.get("http://localhost:3030/demo");
-        const data = res.data[0].todos;
-        setTodoList((prev) => {
-          let tempVar = [...prev, ...data];
-          return [...new Set(tempVar)];
-        });
-        localStorage.setItem("todos", JSON.stringify(todoList));
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    fetch();
-  }, [isOnline]);
-  const handleAddTodo = () => {
-    setTodoList((prev) => [...prev, todo]);
-  };
-  useEffect(() => {
-    if (todoList.length !== 0) {
-      localStorage.setItem("todos", JSON.stringify(todoList));
+    if (currentUser && isOnline) {
+      currentUser.set("todos", todos);
+      currentUser.save();
     }
-  }, [todoList]);
+  }, [todos, isOnline]);
   return (
     <>
-      <p>{isOnline ? "imonline" : "imoffline"}</p>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          marginTop: 60,
-        }}
-      >
-        <div>
-          <div style={{ display: "flex" }}>
-            <input type="text" onChange={(e) => setTodo(e.target.value)} />
-            <button onClick={handleAddTodo}>add</button>
-          </div>
-          {todoList &&
-            todoList.map((items, i) => {
-              return <li key={i}>{items}</li>;
-            })}
-        </div>
-      </div>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Todos />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+        </Routes>
+      </BrowserRouter>
     </>
   );
 };
+
 export default App;
