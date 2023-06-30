@@ -6,8 +6,8 @@ if (currentUser && isOnline) {
   const servertodos = currentUser.get("todos");
   localStorage.setItem("todos", JSON.stringify(servertodos));
 }
-const storedItems = JSON.parse(localStorage.getItem("todos"));
-const initialValue = storedItems ? storedItems : [];
+const storedItems = localStorage.getItem("todos");
+const initialValue = storedItems === undefined ? JSON.parse(storedItems) : [];
 
 const todoSlice = createSlice({
   name: "todos",
